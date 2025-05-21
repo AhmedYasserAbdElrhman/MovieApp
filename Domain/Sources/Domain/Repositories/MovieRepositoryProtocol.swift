@@ -1,0 +1,11 @@
+//
+//  MovieRepositoryProtocol.swift
+//  Domain
+//
+//  Created by Ahmad Yasser on 21/05/2025.
+//
+
+
+public protocol MovieRepositoryProtocol {
+    func getPopularMovies(query: PopularMoviesQueryParameters) async throws -> MovieResponse
+}

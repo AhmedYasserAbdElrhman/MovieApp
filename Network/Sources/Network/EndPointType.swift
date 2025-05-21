@@ -12,4 +12,5 @@ public protocol EndPointType {
     var method: HTTPMethod { get }
     var headers: [String: String]? { get }
     var parameters: [String: Any]? { get }
+    var queryParameters: [String: Any]? { get }
 }

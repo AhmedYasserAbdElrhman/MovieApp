@@ -6,8 +6,9 @@
 //
 
 import Foundation
-struct URLParameterEncoder: ParameterEncoding {
-    func encode(_ urlRequest: inout URLRequest, with parameters: [String : Any]?) throws {
+public struct URLParameterEncoder: ParameterEncoding {
+    public init() {}
+    public func encode(_ urlRequest: inout URLRequest, with parameters: [String : Any]?) throws {
         guard let parameters = parameters else { return }
         
         guard let url = urlRequest.url else {

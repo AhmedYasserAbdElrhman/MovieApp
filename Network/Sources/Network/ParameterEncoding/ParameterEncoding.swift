@@ -6,7 +6,7 @@
 //
 
 import Foundation
-protocol ParameterEncoding {
+public protocol ParameterEncoding {
     func encode(_ urlRequest: inout URLRequest, with parameters: [String: Any]?) throws
 }
 

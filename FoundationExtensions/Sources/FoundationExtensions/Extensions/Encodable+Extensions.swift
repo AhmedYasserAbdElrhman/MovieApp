@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  Utils
+//  Encodable+Extensions.swift
+//  FoundationExtensions
 //
 //  Created by Ahmad Yasser on 21/05/2025.
 //

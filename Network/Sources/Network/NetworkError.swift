@@ -11,6 +11,7 @@ enum NetworkError: Error, LocalizedError {
     case requestFailed(Error)
     case invalidResponse
     case decodingError(Error)
+    case unAuthorized
     case serverError(statusCode: Int)
     case rateLimitExceeded
     case unknown
@@ -25,6 +26,8 @@ enum NetworkError: Error, LocalizedError {
             return "The response from the server was invalid."
         case .decodingError(let error):
             return "Failed to decode the response: \(error.localizedDescription)"
+        case .unAuthorized:
+            return "Unauthorized access. Please check API Key."
         case .serverError(let statusCode):
             return "Server returned an error with status code: \(statusCode)."
         case .rateLimitExceeded:

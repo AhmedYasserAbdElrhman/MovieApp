@@ -36,6 +36,8 @@ public final class NetworkClient: NetworkClientProtocol {
                     print("This Json had a decodingError: \(error)", String(data: data, encoding: .utf8) ?? "")
                     throw NetworkError.decodingError(error)
                 }
+            case 401:
+                throw NetworkError.unAuthorized
             case 429:
                 throw NetworkError.rateLimitExceeded
             case 400...499:

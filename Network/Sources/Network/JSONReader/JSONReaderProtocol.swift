@@ -7,7 +7,7 @@
 
 import Foundation
 /// Protocol defining the contract for JSON decoding operations
-public protocol JSONReaderProtocol {
+public protocol JSONReaderProtocol: Sendable {
     /// Decodes JSON data into the inferred type
     /// - Parameter data: The JSON data to decode
     /// - Returns: A decoded instance of the inferred type

@@ -8,6 +8,6 @@
 
 import Foundation
 
-public protocol NetworkClientProtocol {
+public protocol NetworkClientProtocol: Sendable {
     func performRequest<T: Decodable>(_ request: URLRequestConvertible) async throws -> T
 }

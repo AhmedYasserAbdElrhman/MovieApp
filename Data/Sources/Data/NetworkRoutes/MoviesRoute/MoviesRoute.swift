@@ -9,7 +9,7 @@ import Network
 import FoundationExtensions
 import Domain
 enum MoviesRoute {
-    case popular(query: PopularMoviesQueryParameters)
+    case popular(query: GetMoviesQueryParameters)
 }
 
 extension MoviesRoute: EndPointType {

@@ -14,7 +14,7 @@ public final class MovieRepository: MovieRepositoryProtocol {
         self.networkClient = networkClient
     }
     
-    public func getPopularMovies(query: PopularMoviesQueryParameters) async throws -> MovieResponse {
+    public func getPopularMovies(query: GetMoviesQueryParameters) async throws -> MovieResponse {
         try await networkClient.performRequest(MoviesRoute.popular(query: query))
     }
     

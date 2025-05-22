@@ -16,7 +16,7 @@ public final class GetPopularMoviesUseCase: UseCase {
         self.repository = repository
     }
     
-    public func execute(requestValue: PopularMoviesQueryParameters) async throws -> MovieResponse {
+    public func execute(requestValue: GetMoviesQueryParameters) async throws -> MovieResponse {
         try await repository.getPopularMovies(query: requestValue)
     }
 }

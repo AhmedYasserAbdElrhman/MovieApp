@@ -38,6 +38,9 @@ final class MovieListViewModel: ViewModelType {
     private let dependencies: Dependencies
     private var moviesResponse: MovieResponse?
     private var isFetching = false
+    // cache for first‐page popular
+    private var popularFirstPageCache: MovieResponse?
+    private var currentSearchQuery: String?
     // MARK: - Private Publishers
     private let movieSectionsSubject = CurrentValueSubject<[MovieSection], Never>([])
     private let isLoadingSubject = CurrentValueSubject<Bool, Never>(false)
@@ -54,9 +57,16 @@ final class MovieListViewModel: ViewModelType {
         input.searchText
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
             .removeDuplicates()
-            .filter { $0.count >= 3 } // Only proceed if text has at least 3 characters
             .sink { [weak self] query in
-                self?.searchMovies(with: query)
+                guard let self else { return }
+                self.currentSearchQuery = query
+                if query.isEmpty {
+                    // show cached popular (or trigger fetch if empty)
+                    self.showCachedOrFetchPopular()
+                } else if query.count >= 3 {
+                    self.performSearch(query)
+                }
+                return
             }
             .store(in: &cancellables)
         
@@ -77,7 +87,7 @@ final class MovieListViewModel: ViewModelType {
         // Handle initial load
         input.viewDidLoad
             .sink { [weak self] _ in
-                self?.fetchPopularMovies(page: 1)
+                self?.loadPopular(page: 1)
             }
             .store(in: &cancellables)
         
@@ -89,7 +99,11 @@ final class MovieListViewModel: ViewModelType {
             }
             .sink { [weak self] in
                 guard let self else { return }
-                self.fetchPopularMovies(page: self.currentPage + 1)
+                if let currentSearchQuery, !currentSearchQuery.isEmpty {
+                    self.performSearch(currentSearchQuery, page: currentPage + 1)
+                } else {
+                    self.loadPopular(page: self.currentPage + 1)
+                }
             }
             .store(in: &cancellables)
         return Output(
@@ -100,46 +114,69 @@ final class MovieListViewModel: ViewModelType {
     }
     
     // MARK: - Private Methods
-    private func searchMovies(with query: String) {
-        isLoadingSubject.send(true)
+    private func showCachedOrFetchPopular() {
+        if let popularFirstPageCache, !popularFirstPageCache.results.isEmpty {
+            let results = popularFirstPageCache.results
+            let sections = createMovieSections(from: results.map(Movie.init))
+            movieSectionsSubject.send(sections)
+            // For making currentPage and lastPage logic works fine
+            moviesResponse = popularFirstPageCache
+        } else {
+            loadPopular(page: 1)
+        }
     }
-    private func fetchPopularMovies(page: Int) {
-        let queryParameters = PopularMoviesQueryParameters(page: page)
+
+    private func loadPopular(page: Int) {
+        let params = GetMoviesQueryParameters(page: page)
+        fetch(
+            useCase: dependencies.popularMoviesUseCase,
+            params: params,
+            type: .popular,
+            page: page
+        )
+    }
+
+    private func performSearch(_ query: String, page: Int = 1) {
+        let params = GetMoviesQueryParameters(page: page, query: query)
+        fetch(
+            useCase: dependencies.searchMoviesUseCase,
+            params: params,
+            type: .search(query),
+            page: page
+        )
+    }
+
+    private func fetch<U: UseCase>(
+        useCase: U,
+        params: U.RequestValue,
+        type: FetchType,
+        page: Int
+    ) where U.RequestValue == GetMoviesQueryParameters, U.ResponseValue == MovieResponse
+    {
+        guard !isFetching else { return }
         isFetching = true
-        // Capture dependencies locally to avoid capturing self
-        let movieUseCase = dependencies.popularMoviesUseCase
-        
+
         Task {
-            await MainActor.run {
-                self.isLoadingSubject.send(true)
-            }
-            
+            await MainActor.run { self.isLoadingSubject.send(true) }
             do {
-                
-                // Execute the use case
-                let response = try await movieUseCase.execute(requestValue: queryParameters)
-                
-                // Switch to the main actor for UI updates
+                let response = try await useCase.execute(requestValue: params)
                 await MainActor.run {
-                    handleResponse(response: response, page: page)
+                    self.handleResponse(response, page: page, type: type)
                 }
-                
             } catch {
-                // Handle errors on the main actor
-                await MainActor.run {
-                    self.isLoadingSubject.send(false)
-                    self.isFetching = false
-                    self.errorSubject.send(error)
-                }
+                await MainActor.run { self.handleError(error: error) }
             }
         }
     }
-    @MainActor
-    private func handleResponse(response: MovieResponse, page: Int) {
-        self.moviesResponse = response
 
+    @MainActor
+    private func handleResponse(_ response: MovieResponse, page: Int, type: FetchType) {
+        self.moviesResponse = response
         let newSections = createMovieSections(from: response.results.map(Movie.init))
-        
+
+        if case .popular = type, page == 1 {
+            popularFirstPageCache = response
+        }
         let sections: [MovieSection]
         if page == 1 {
             sections = newSections
@@ -150,6 +187,12 @@ final class MovieListViewModel: ViewModelType {
         movieSectionsSubject.send(sections)
         isLoadingSubject.send(false)
         isFetching = false
+    }
+    @MainActor
+    private func handleError(error: Error) {
+        self.isLoadingSubject.send(false)
+        self.isFetching = false
+        self.errorSubject.send(error)
     }
     private func createMovieSections(from movies: [Movie]) -> [MovieSection] {
         let groupedByYear = Dictionary(grouping: movies) { $0.releaseYear }

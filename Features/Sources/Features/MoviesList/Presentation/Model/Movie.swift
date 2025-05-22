@@ -10,13 +10,7 @@ import FoundationExtensions
 struct Movie {
     // TMDb image config
     private static let imageBaseURL = "https://image.tmdb.org/t/p/"
-    private static let imageSize = "original"
-    
-    var posterURL: URL? {
-        guard let path = posterPath else { return nil }
-        return URL(string: Self.imageBaseURL + Self.imageSize + path)
-    }
-    
+
     var releaseYear: Int {
         guard let dateStr = releaseDate,
                 !dateStr.isEmpty,
@@ -37,5 +31,9 @@ struct Movie {
         self.overview = movieEntity.overview
         self.posterPath = movieEntity.posterPath
         self.releaseDate = movieEntity.releaseDate
+    }
+    func posterURL(for size: TMDBPosterSize = .w185) -> URL? {
+        guard let path = posterPath else { return nil }
+        return URL(string: Self.imageBaseURL + size.rawValue + path)
     }
 }

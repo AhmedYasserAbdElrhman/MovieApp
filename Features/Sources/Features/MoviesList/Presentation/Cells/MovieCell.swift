@@ -113,7 +113,7 @@ final class MovieCell: UITableViewCell {
         setWatchlistState(movie.isOnWatchlist)
         self.onWatchlistToggle = onWatchlistToggle
         let imagePlaceHolder = UIImage(systemName: "film")
-        if let url = movie.posterURL {
+        if let url = movie.posterURL() {
             movieImageView.setImage(with: url, placeholder: imagePlaceHolder)
         } else {
             movieImageView.image = imagePlaceHolder

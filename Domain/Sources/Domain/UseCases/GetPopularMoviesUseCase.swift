@@ -7,8 +7,8 @@
 
 
 public final class GetPopularMoviesUseCase: UseCase {
-    typealias RequestValue = GetMoviesQueryParameters
-    typealias ResponseValue = MovieResponse
+    public typealias RequestValue = GetMoviesQueryParameters
+    public typealias ResponseValue = MovieResponse
     
     private let repository: MovieRepositoryProtocol
     

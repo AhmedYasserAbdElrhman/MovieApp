@@ -6,7 +6,7 @@
 //
 
 
-protocol UseCase {
+public protocol UseCase {
     associatedtype RequestValue
     associatedtype ResponseValue
     

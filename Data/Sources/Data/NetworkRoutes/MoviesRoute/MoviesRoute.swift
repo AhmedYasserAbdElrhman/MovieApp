@@ -10,6 +10,7 @@ import FoundationExtensions
 import Domain
 enum MoviesRoute {
     case popular(query: GetMoviesQueryParameters)
+    case search(query: GetMoviesQueryParameters)
 }
 
 extension MoviesRoute: EndPointType {
@@ -21,12 +22,14 @@ extension MoviesRoute: EndPointType {
         switch self {
         case .popular:
             MoviesEndpointPaths.popular
+        case .search:
+            MoviesEndpointPaths.search
         }
     }
     
     var method: Network.HTTPMethod {
         switch self {
-        case .popular:
+        case .popular, .search:
                 .GET
         }
     }
@@ -37,14 +40,14 @@ extension MoviesRoute: EndPointType {
     
     var parameters: [String : Any]? {
         switch self {
-        case .popular:
+        case .popular, .search:
             return nil
         }
     }
     
     var queryParameters: [String : Any]? {
         switch self {
-        case .popular(let query):
+        case .popular(let query), .search(let query):
             query.toDictionary()
         }
     }
@@ -58,7 +61,7 @@ extension MoviesRoute: URLRequestConvertible {
         request.allHTTPHeaderFields = headers
         let encoder: ParameterEncoding
         switch self {
-        case .popular:
+        case .popular, .search:
             encoder = URLParameterEncoder()
             try encoder.encode(&request, with: queryParameters)
         }

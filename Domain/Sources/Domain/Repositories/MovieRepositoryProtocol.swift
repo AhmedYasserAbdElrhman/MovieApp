@@ -8,4 +8,5 @@
 
 public protocol MovieRepositoryProtocol {
     func getPopularMovies(query: GetMoviesQueryParameters) async throws -> MovieResponse
+    func searchMovies(query: GetMoviesQueryParameters) async throws -> MovieResponse
 }

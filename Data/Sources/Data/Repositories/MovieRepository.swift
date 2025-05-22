@@ -17,10 +17,11 @@ public final class MovieRepository: MovieRepositoryProtocol {
     public func getPopularMovies(query: GetMoviesQueryParameters) async throws -> MovieResponse {
         try await networkClient.performRequest(MoviesRoute.popular(query: query))
     }
-    
-//    func searchMovies(query: String, page: Int) async throws -> [Movie] {
-//    }
-//    
+    public func searchMovies(query: GetMoviesQueryParameters) async throws -> MovieResponse {
+        try await networkClient.performRequest(MoviesRoute.search(query: query))
+    }
+
+//
 //    func getMovieDetails(id: Int) async throws -> MovieDetails {
 //    }
 //    

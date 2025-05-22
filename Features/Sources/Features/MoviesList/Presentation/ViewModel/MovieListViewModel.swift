@@ -10,7 +10,10 @@ import Foundation
 import Domain
 @MainActor
 final class MovieListViewModel: ViewModelType {
-    
+    private enum FetchType {
+        case popular
+        case search(String)
+    }
     // MARK: - Input/Output Types
     struct Input {
         let searchText: AnyPublisher<String, Never>

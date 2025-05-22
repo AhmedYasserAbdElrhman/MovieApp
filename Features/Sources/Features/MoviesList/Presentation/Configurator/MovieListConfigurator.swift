@@ -15,7 +15,11 @@ public struct MovieListConfigurator {
         // Setup dependencies here
         let moviesRepo: MovieRepositoryProtocol = MovieRepository()
         let popularMoviesUseCase = GetPopularMoviesUseCase(repository: moviesRepo)
-        let dependencies = MovieListViewModel.Dependencies(popularMoviesUseCase: popularMoviesUseCase)
+        let searchMoviesUseCase = SearchMoviesUseCase(repository: moviesRepo)
+        let dependencies = MovieListViewModel.Dependencies(
+            popularMoviesUseCase: popularMoviesUseCase,
+            searchMoviesUseCase: searchMoviesUseCase
+        )
         
         // Return VC with dependencies injected
         return MovieListViewController(dependencies: dependencies)

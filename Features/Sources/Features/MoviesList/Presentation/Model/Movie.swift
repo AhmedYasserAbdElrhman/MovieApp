@@ -25,12 +25,13 @@ struct Movie {
     let posterPath: String?
     let releaseDate: String?
     var isOnWatchlist: Bool = false
-    init(movieEntity: Domain.Movie) {
+    init(movieEntity: Domain.Movie, isOnWatchList: Bool) {
         self.id = movieEntity.id
         self.title = movieEntity.title
         self.overview = movieEntity.overview
         self.posterPath = movieEntity.posterPath
         self.releaseDate = movieEntity.releaseDate
+        self.isOnWatchlist = isOnWatchList
     }
     func posterURL(for size: TMDBPosterSize = .w185) -> URL? {
         guard let path = posterPath else { return nil }

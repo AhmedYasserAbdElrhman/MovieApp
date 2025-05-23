@@ -8,5 +8,5 @@
 
 struct MovieSection {
     let year: Int
-    let movies: [Movie]
+    var movies: [Movie]
 }

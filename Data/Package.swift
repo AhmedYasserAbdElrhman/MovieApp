@@ -15,7 +15,8 @@ let package = Package(
     dependencies: [
         .package(path: "../Network"),
         .package(path: "../FoundationExtensions"),
-        .package(path: "../Domain")
+        .package(path: "../Domain"),
+        .package(path: "../Storage")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -26,6 +27,7 @@ let package = Package(
                 .product(name: "Network", package: "Network"),
                 .product(name: "FoundationExtensions", package: "FoundationExtensions"),
                 .product(name: "Domain", package: "Domain"),
+                .product(name: "Storage", package: "Storage"),
             ]
         ),
 

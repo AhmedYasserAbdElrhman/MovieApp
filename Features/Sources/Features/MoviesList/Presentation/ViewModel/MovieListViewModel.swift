@@ -33,6 +33,8 @@ final class MovieListViewModel: ViewModelType {
     struct Dependencies {
         let popularMoviesUseCase: GetPopularMoviesUseCase
         let searchMoviesUseCase: SearchMoviesUseCase
+        let addToWatchListUseCase: AddToWatchListUseCase
+        let getAllWatchListUseCase: GetAllWatchListUseCase
     }
     // MARK: - Variables
     private let dependencies: Dependencies

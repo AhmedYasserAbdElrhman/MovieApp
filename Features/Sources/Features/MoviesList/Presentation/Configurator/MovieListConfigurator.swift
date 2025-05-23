@@ -16,9 +16,14 @@ public struct MovieListConfigurator {
         let moviesRepo: MovieRepositoryProtocol = MovieRepository()
         let popularMoviesUseCase = GetPopularMoviesUseCase(repository: moviesRepo)
         let searchMoviesUseCase = SearchMoviesUseCase(repository: moviesRepo)
+        let watchListLocalRepository: WatchListLocalRepositoryProtocol = WatchListLocalRepository()
+        let addToWatchListUseCase = AddToWatchListUseCase(localRepository: watchListLocalRepository)
+        let getAllWatchListUseCase = GetAllWatchListUseCase(localRepository: watchListLocalRepository)
         let dependencies = MovieListViewModel.Dependencies(
             popularMoviesUseCase: popularMoviesUseCase,
-            searchMoviesUseCase: searchMoviesUseCase
+            searchMoviesUseCase: searchMoviesUseCase,
+            addToWatchListUseCase: addToWatchListUseCase,
+            getAllWatchListUseCase: getAllWatchListUseCase
         )
         
         // Return VC with dependencies injected

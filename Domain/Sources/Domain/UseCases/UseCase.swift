@@ -12,3 +12,10 @@ public protocol UseCase {
     
     func execute(requestValue: RequestValue) async throws -> ResponseValue
 }
+
+extension UseCase where RequestValue == () {
+    /// sugar-overload so you can just call `execute()` when there are no args
+    public func execute() async throws -> ResponseValue {
+        try await execute(requestValue: ())
+    }
+}

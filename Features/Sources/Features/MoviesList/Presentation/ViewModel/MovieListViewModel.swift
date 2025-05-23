@@ -37,6 +37,7 @@ final class MovieListViewModel: ViewModelType {
         let searchMoviesUseCase: SearchMoviesUseCase
         let addToWatchListUseCase: AddToWatchListUseCase
         let getAllWatchListUseCase: GetAllWatchListUseCase
+        let removeFromWatchListUseCase: RemoveFromWatchListUseCase
     }
     // MARK: - Variables
     private let dependencies: Dependencies

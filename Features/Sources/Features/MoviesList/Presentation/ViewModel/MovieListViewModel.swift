@@ -95,8 +95,11 @@ final class MovieListViewModel: ViewModelType {
                     .value[indexPath.section]
                     .movies[indexPath.row]
                 guard movie.id == id else { return }
-                if !movie.isOnWatchlist {
+                if movie.isOnWatchlist {
+                    self.performRemoveFromWatchList(id, indexPath: indexPath)
+                } else {
                     self.performAddToWatchList(id, indexPath: indexPath)
+                    
                 }
             }
             .store(in: &cancellables)
@@ -247,7 +250,27 @@ extension MovieListViewModel {
             }
         }
     }
-        
+    private func performRemoveFromWatchList(_ movieId: Int, indexPath: IndexPath) {
+        let useCase = dependencies.removeFromWatchListUseCase
+        Task {
+            do {
+                try await useCase.execute(requestValue: movieId)
+                await MainActor.run {
+                    // Remove from local cache
+                    watchlistMovieIds.remove(movieId)
+                    movieSectionsSubject
+                        .value[indexPath.section]
+                        .movies[indexPath.row].isOnWatchlist = false
+//                    watchlistUpdatesSubject.send([indexPath])
+                }
+                    
+            } catch {
+                print(error.coreDataFriendlyMessage)
+                await MainActor.run { self.handleError(errorMessage: error.coreDataFriendlyMessage) }
+            }
+        }
+    }
+    
     private func getAllWatchListMovies() {
         let useCase = dependencies.getAllWatchListUseCase
         Task {

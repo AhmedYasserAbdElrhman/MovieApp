@@ -45,7 +45,6 @@ final class MovieCell: UITableViewCell {
         button.setImage(UIImage(systemName: "bookmark"), for: .normal)
         button.tintColor = .systemBlue
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(MovieCell.self, action: #selector(watchlistButtonTapped), for: .touchUpInside)
         return button
     }()
 
@@ -74,6 +73,12 @@ final class MovieCell: UITableViewCell {
         contentView.addSubview(movieImageView)
         contentView.addSubview(rightSideStackView)
         
+        watchlistButton.addTarget(
+            self,
+            action: #selector(watchlistButtonTapped),
+            for: .touchUpInside
+        )
+
         // Add titleLabel and button to the horizontal stack
         titleButtonStackView.addArrangedSubview(titleLabel)
         titleButtonStackView.addArrangedSubview(watchlistButton)
@@ -105,6 +110,7 @@ final class MovieCell: UITableViewCell {
         titleLabel.text = nil
         overviewLabel.text = nil
         movieImageView.image = nil
+        onWatchlistToggle = nil
     }
     // MARK: - Configuration
 

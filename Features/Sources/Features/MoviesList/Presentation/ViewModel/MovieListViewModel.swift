@@ -302,7 +302,7 @@ extension MovieListViewModel {
     
     private func createMovieSections(from movies: [Movie]) -> [MovieSection] {
         let groupedByYear = Dictionary(grouping: movies) { $0.releaseYear }
-        let sections = groupedByYear.map { MovieSection(year: Int($0.key) ?? 0, movies: $0.value) }
+        let sections = groupedByYear.map { MovieSection(year: Int($0.key), movies: $0.value) }
         return sections.sorted(by: { $0.year > $1.year })
     }
 }

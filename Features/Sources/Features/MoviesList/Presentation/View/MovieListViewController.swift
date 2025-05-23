@@ -149,10 +149,10 @@ class MovieListViewController: UIViewController {
             .store(in: &cancellables)
     }
     
-    private func showError(_ error: Error) {
+    private func showError(_ errorMessage: String) {
         let alert = UIAlertController(
             title: "Error",
-            message: error.localizedDescription,
+            message: errorMessage,
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: "OK", style: .default))

@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		96D8DAC12DE0B1E1002C2091 /* Features in Frameworks */ = {isa = PBXBuildFile; productRef = 96D8DAC02DE0B1E1002C2091 /* Features */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		96D8B59A2DDD1410006A5874 /* MovieApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MovieApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96D8DAC12DE0B1E1002C2091 /* Features in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = MovieApp;
 			packageProductDependencies = (
+				96D8DAC02DE0B1E1002C2091 /* Features */,
 			);
 			productName = MovieApp;
 			productReference = 96D8B59A2DDD1410006A5874 /* MovieApp.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = 96D8B5912DDD1410006A5874;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				96D8DABF2DE0B1E1002C2091 /* XCLocalSwiftPackageReference "Features" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 96D8B59B2DDD1410006A5874 /* Products */;
 			projectDirPath = "";
@@ -343,6 +352,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		96D8DABF2DE0B1E1002C2091 /* XCLocalSwiftPackageReference "Features" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Features;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		96D8DAC02DE0B1E1002C2091 /* Features */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Features;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 96D8B5922DDD1410006A5874 /* Project object */;
 }

@@ -28,7 +28,6 @@ final class MovieListViewModel: ViewModelType {
         let movieSections: AnyPublisher<[MovieSection], Never>
         let isLoading: AnyPublisher<Bool, Never>
         let error: AnyPublisher<String, Never>
-        let watchlistUpdates: AnyPublisher<[IndexPath], Never>
     }
     
     // MARK: - Dependencies
@@ -51,7 +50,6 @@ final class MovieListViewModel: ViewModelType {
     private let movieSectionsSubject = CurrentValueSubject<[MovieSection], Never>([])
     private let isLoadingSubject = CurrentValueSubject<Bool, Never>(false)
     private let errorSubject = PassthroughSubject<String, Never>()
-    private let watchlistUpdatesSubject = PassthroughSubject<[IndexPath], Never>()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
@@ -130,8 +128,7 @@ final class MovieListViewModel: ViewModelType {
         return Output(
             movieSections: movieSectionsSubject.eraseToAnyPublisher(),
             isLoading: isLoadingSubject.eraseToAnyPublisher(),
-            error: errorSubject.eraseToAnyPublisher(),
-            watchlistUpdates: watchlistUpdatesSubject.eraseToAnyPublisher()
+            error: errorSubject.eraseToAnyPublisher()
         )
     }
 }
@@ -241,7 +238,6 @@ extension MovieListViewModel {
                     movieSectionsSubject
                         .value[indexPath.section]
                         .movies[indexPath.row].isOnWatchlist = true
-                    watchlistUpdatesSubject.send([indexPath])
                 }
                 
             } catch {
@@ -261,7 +257,6 @@ extension MovieListViewModel {
                     movieSectionsSubject
                         .value[indexPath.section]
                         .movies[indexPath.row].isOnWatchlist = false
-//                    watchlistUpdatesSubject.send([indexPath])
                 }
                     
             } catch {
@@ -297,7 +292,6 @@ extension MovieListViewModel {
 extension MovieListViewModel {
     private func updateMoviesWatchlistStatus() {
         let sections = movieSectionsSubject.value
-        var changedIndices = [IndexPath]()
         
         for sectionIndex in 0..<sections.count {
             let movies = sections[sectionIndex].movies
@@ -308,19 +302,11 @@ extension MovieListViewModel {
                 let shouldBeOnWatchlist = watchlistMovieIds.contains(movieId)
                 
                 // Only update if status has changed
-                if currentStatus != shouldBeOnWatchlist {
-                    let indexPath = IndexPath(row: movieIndex, section: sectionIndex)
-                    changedIndices.append(indexPath)
-                    
+                if currentStatus != shouldBeOnWatchlist {                    
                     // Update the model
                     movieSectionsSubject.value[sectionIndex].movies[movieIndex].isOnWatchlist = shouldBeOnWatchlist
                 }
             }
-        }
-        
-        // Only emit if there are changes
-        if !changedIndices.isEmpty {
-            watchlistUpdatesSubject.send(changedIndices)
         }
     }
     

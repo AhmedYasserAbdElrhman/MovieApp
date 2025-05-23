@@ -45,6 +45,7 @@ final class MovieCell: UITableViewCell {
         button.setImage(UIImage(systemName: "bookmark"), for: .normal)
         button.tintColor = .systemBlue
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(watchlistButtonTapped), for: .touchUpInside)
         return button
     }()
 

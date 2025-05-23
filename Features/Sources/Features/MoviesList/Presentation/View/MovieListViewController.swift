@@ -147,6 +147,11 @@ class MovieListViewController: UIViewController {
                 self?.showError(error)
             }
             .store(in: &cancellables)
+        output.watchlistUpdates
+            .sink { [weak self] indexPaths in
+                self?.tableView.reloadRows(at: indexPaths, with: .automatic)
+            }
+            .store(in: &cancellables)
     }
     
     private func showError(_ errorMessage: String) {

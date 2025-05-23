@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 import Domain
+import FoundationExtensions
 @MainActor
 final class MovieListViewModel: ViewModelType {
     private enum FetchType {
@@ -26,7 +27,8 @@ final class MovieListViewModel: ViewModelType {
     struct Output {
         let movieSections: AnyPublisher<[MovieSection], Never>
         let isLoading: AnyPublisher<Bool, Never>
-        let error: AnyPublisher<Error, Never>
+        let error: AnyPublisher<String, Never>
+        let watchlistUpdates: AnyPublisher<[IndexPath], Never>
     }
     
     // MARK: - Dependencies
@@ -40,13 +42,15 @@ final class MovieListViewModel: ViewModelType {
     private let dependencies: Dependencies
     private var moviesResponse: MovieResponse?
     private var isFetching = false
+    private var watchlistMovieIds = Set<Int>()
     // cache for first‐page popular
     private var popularFirstPageCache: MovieResponse?
     private var currentSearchQuery: String?
     // MARK: - Private Publishers
     private let movieSectionsSubject = CurrentValueSubject<[MovieSection], Never>([])
     private let isLoadingSubject = CurrentValueSubject<Bool, Never>(false)
-    private let errorSubject = PassthroughSubject<Error, Never>()
+    private let errorSubject = PassthroughSubject<String, Never>()
+    private let watchlistUpdatesSubject = PassthroughSubject<[IndexPath], Never>()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
@@ -83,6 +87,16 @@ final class MovieListViewModel: ViewModelType {
         // Handle watchlist toggle
         input.toggleWatchlist
             .sink { [weak self] data in
+                guard let self else { return }
+                let id = data.id
+                let indexPath = data.indexPath
+                let movie = self.movieSectionsSubject
+                    .value[indexPath.section]
+                    .movies[indexPath.row]
+                guard movie.id == id else { return }
+                if !movie.isOnWatchlist {
+                    self.performAddToWatchList(id, indexPath: indexPath)
+                }
             }
             .store(in: &cancellables)
         
@@ -90,6 +104,7 @@ final class MovieListViewModel: ViewModelType {
         input.viewDidLoad
             .sink { [weak self] _ in
                 self?.loadPopular(page: 1)
+                self?.getAllWatchListMovies()
             }
             .store(in: &cancellables)
         
@@ -111,15 +126,18 @@ final class MovieListViewModel: ViewModelType {
         return Output(
             movieSections: movieSectionsSubject.eraseToAnyPublisher(),
             isLoading: isLoadingSubject.eraseToAnyPublisher(),
-            error: errorSubject.eraseToAnyPublisher()
+            error: errorSubject.eraseToAnyPublisher(),
+            watchlistUpdates: watchlistUpdatesSubject.eraseToAnyPublisher()
         )
     }
-    
-    // MARK: - Private Methods
+}
+// MARK: - Movie Fetching Methods
+extension MovieListViewModel {
     private func showCachedOrFetchPopular() {
         if let popularFirstPageCache, !popularFirstPageCache.results.isEmpty {
             let results = popularFirstPageCache.results
-            let sections = createMovieSections(from: results.map(Movie.init))
+            let mappedResult = results.map { Movie(movieEntity: $0, isOnWatchList: watchlistMovieIds.contains($0.id))}
+            let sections = createMovieSections(from: mappedResult)
             movieSectionsSubject.send(sections)
             // For making currentPage and lastPage logic works fine
             moviesResponse = popularFirstPageCache
@@ -127,7 +145,7 @@ final class MovieListViewModel: ViewModelType {
             loadPopular(page: 1)
         }
     }
-
+    
     private func loadPopular(page: Int) {
         let params = GetMoviesQueryParameters(page: page)
         fetch(
@@ -137,7 +155,7 @@ final class MovieListViewModel: ViewModelType {
             page: page
         )
     }
-
+    
     private func performSearch(_ query: String, page: Int = 1) {
         let params = GetMoviesQueryParameters(page: page, query: query)
         fetch(
@@ -147,7 +165,7 @@ final class MovieListViewModel: ViewModelType {
             page: page
         )
     }
-
+    
     private func fetch<U: UseCase>(
         useCase: U,
         params: U.RequestValue,
@@ -157,7 +175,7 @@ final class MovieListViewModel: ViewModelType {
     {
         guard !isFetching else { return }
         isFetching = true
-
+        
         Task {
             await MainActor.run { self.isLoadingSubject.send(true) }
             do {
@@ -166,16 +184,23 @@ final class MovieListViewModel: ViewModelType {
                     self.handleResponse(response, page: page, type: type)
                 }
             } catch {
-                await MainActor.run { self.handleError(error: error) }
+                await MainActor.run { self.handleError(errorMessage: error.localizedDescription) }
             }
         }
     }
-
+    
     @MainActor
     private func handleResponse(_ response: MovieResponse, page: Int, type: FetchType) {
         self.moviesResponse = response
-        let newSections = createMovieSections(from: response.results.map(Movie.init))
-
+        let results = response.results
+        let mappedResult = results.map {
+            Movie(
+                movieEntity: $0,
+                isOnWatchList: watchlistMovieIds.contains($0.id)
+            )
+        }
+        let newSections = createMovieSections(from: mappedResult)
+        
         if case .popular = type, page == 1 {
             popularFirstPageCache = response
         }
@@ -185,30 +210,112 @@ final class MovieListViewModel: ViewModelType {
         } else {
             sections = movieSectionsSubject.value + newSections
         }
-
+        
         movieSectionsSubject.send(sections)
         isLoadingSubject.send(false)
         isFetching = false
     }
+    
     @MainActor
-    private func handleError(error: Error) {
+    private func handleError(errorMessage: String) {
         self.isLoadingSubject.send(false)
         self.isFetching = false
-        self.errorSubject.send(error)
+        self.errorSubject.send(errorMessage)
     }
+}
+
+// MARK: - Watchlist Operations
+extension MovieListViewModel {
+    private func performAddToWatchList(_ movieId: Int, indexPath: IndexPath) {
+        let useCase = dependencies.addToWatchListUseCase
+        Task {
+            do {
+                try await useCase.execute(requestValue: movieId)
+                await MainActor.run {
+                    // Add to local cache
+                    watchlistMovieIds.insert(movieId)
+                    movieSectionsSubject
+                        .value[indexPath.section]
+                        .movies[indexPath.row].isOnWatchlist = true
+                    watchlistUpdatesSubject.send([indexPath])
+                }
+                
+            } catch {
+                print(error.coreDataFriendlyMessage)
+                await MainActor.run { self.handleError(errorMessage: error.coreDataFriendlyMessage) }
+            }
+        }
+    }
+        
+    private func getAllWatchListMovies() {
+        let useCase = dependencies.getAllWatchListUseCase
+        Task {
+            do {
+                let ids = try await useCase.execute()
+                await MainActor.run {
+                    let oldIds = self.watchlistMovieIds
+                    self.watchlistMovieIds = Set(ids)
+                    
+                    // Only update if the watchlist IDs have changed
+                    if oldIds != self.watchlistMovieIds {
+                        self.updateMoviesWatchlistStatus()
+                    }
+                }
+            } catch {
+                print(error.coreDataFriendlyMessage)
+                await MainActor.run { self.handleError(errorMessage: error.coreDataFriendlyMessage) }
+            }
+        }
+    }
+}
+
+// MARK: - UI Update Methods
+extension MovieListViewModel {
+    private func updateMoviesWatchlistStatus() {
+        let sections = movieSectionsSubject.value
+        var changedIndices = [IndexPath]()
+        
+        for sectionIndex in 0..<sections.count {
+            let movies = sections[sectionIndex].movies
+            
+            for movieIndex in 0..<movies.count {
+                let movieId = movies[movieIndex].id
+                let currentStatus = movies[movieIndex].isOnWatchlist
+                let shouldBeOnWatchlist = watchlistMovieIds.contains(movieId)
+                
+                // Only update if status has changed
+                if currentStatus != shouldBeOnWatchlist {
+                    let indexPath = IndexPath(row: movieIndex, section: sectionIndex)
+                    changedIndices.append(indexPath)
+                    
+                    // Update the model
+                    movieSectionsSubject.value[sectionIndex].movies[movieIndex].isOnWatchlist = shouldBeOnWatchlist
+                }
+            }
+        }
+        
+        // Only emit if there are changes
+        if !changedIndices.isEmpty {
+            watchlistUpdatesSubject.send(changedIndices)
+        }
+    }
+    
     private func createMovieSections(from movies: [Movie]) -> [MovieSection] {
         let groupedByYear = Dictionary(grouping: movies) { $0.releaseYear }
         let sections = groupedByYear.map { MovieSection(year: Int($0.key) ?? 0, movies: $0.value) }
         return sections.sorted(by: { $0.year > $1.year })
     }
 }
+
+// MARK: - Helper Computed Properties
 extension MovieListViewModel {
     var currentPage: Int {
-        guard let moviesResponse else { return 0}
+        guard let moviesResponse else { return 0 }
         return moviesResponse.page
     }
+    
     var lastPage: Int {
-        guard let moviesResponse else { return 0}
+        guard let moviesResponse else { return 0 }
         return moviesResponse.totalPages
     }
 }

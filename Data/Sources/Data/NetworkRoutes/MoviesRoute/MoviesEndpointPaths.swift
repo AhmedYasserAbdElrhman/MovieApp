@@ -9,4 +9,5 @@
 struct MoviesEndpointPaths {
     static let popular = "/movie/popular"
     static let search = "/search/movie"
+    static let details = "/movie/%d"
 }

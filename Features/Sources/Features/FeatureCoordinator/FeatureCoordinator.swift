@@ -19,8 +19,11 @@ public class FeatureCoordinator {
     @MainActor
     func handleMovieNavigation(_ navigation: MovieListNavigation) {
         switch navigation {
-        case .movieDetails(let id):
-            let detailViewController = MovieDetailsConfigurator.configure(movieId: id)
+        case let .movieDetails(id, callback):
+            let detailViewController = MovieDetailsConfigurator.configure(
+                movieId: id,
+                callback: callback
+            )
             navigationController?.pushViewController(detailViewController, animated: true)
         }
     }

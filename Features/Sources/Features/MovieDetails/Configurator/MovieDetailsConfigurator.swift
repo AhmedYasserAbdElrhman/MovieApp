@@ -11,7 +11,10 @@ import UIKit
 // MARK: - Configurator
 struct MovieDetailsConfigurator {
     @MainActor
-    static func configure(movieId: Int) -> UIViewController {
+    static func configure(
+        movieId: Int,
+        callback: @escaping (MovieDetailsBack) -> Void
+    ) -> UIViewController {
         // Setup dependencies here
         let moviesRepo: MovieRepositoryProtocol = MovieRepository()
         let getMovieDetailsUseCase = GetMovieDetailsUseCase(repository: moviesRepo)
@@ -28,7 +31,8 @@ struct MovieDetailsConfigurator {
             getMovieCreditsUseCase: getMovieCreditsUseCase,
             addToWatchListUseCase: addToWatchListUseCase,
             removeFromWatchListUseCase: removeFromWatchListUseCase,
-            isInWatchListUseCase: isInWatchListUseCase
+            isInWatchListUseCase: isInWatchListUseCase,
+            callback: callback
         )
         
         // Return VC with dependencies injected

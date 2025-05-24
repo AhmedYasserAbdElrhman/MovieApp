@@ -36,6 +36,7 @@ class MovieDetailsViewModel: ViewModelType {
         let addToWatchListUseCase: AddToWatchListUseCase
         let removeFromWatchListUseCase: RemoveFromWatchListUseCase
         let isInWatchListUseCase: IsInWatchListUseCase
+        let callback: (MovieDetailsBack) -> Void
     }
 
     // MARK: - Properties
@@ -53,6 +54,9 @@ class MovieDetailsViewModel: ViewModelType {
     // MARK: - Initialization
     init(dependencies: Dependencies) {
         self.dependencies = dependencies
+    }
+    deinit {
+        print("Deinit MovieDetailsViewModel")
     }
     // MARK: - Transform
     func transform(input: Input) -> Output {
@@ -191,6 +195,7 @@ class MovieDetailsViewModel: ViewModelType {
                 await MainActor.run {
                     // Add to local cache
                     isInWatchListSubject.send(true)
+                    dependencies.callback(.didAddToWatchlist(movieId))
                 }
                 
             } catch {
@@ -207,6 +212,7 @@ class MovieDetailsViewModel: ViewModelType {
                 await MainActor.run {
                     // Add to local cache
                     isInWatchListSubject.send(false)
+                    dependencies.callback(.didRemoveFromWatchlist(movieId))
                 }
                 
             } catch {

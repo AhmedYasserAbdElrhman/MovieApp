@@ -57,7 +57,7 @@ class MovieListViewController: UIViewController {
     // Publishers for user actions
     private let searchTextSubject = PassthroughSubject<String, Never>()
     private let toggleWatchlistSubject = PassthroughSubject<(id: Int, indexPath: IndexPath), Never>()
-    private let selectMovieSubject = PassthroughSubject<Movie, Never>()
+    private let selectMovieSubject = PassthroughSubject<(id: Int, indexPath: IndexPath), Never>()
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
     let reachedBottomSubject = PassthroughSubject<Void, Never>()
     // MARK: - Initialization
@@ -185,7 +185,7 @@ extension MovieListViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let movie = movieSections[indexPath.section].movies[indexPath.row]
-        selectMovieSubject.send(movie)
+        selectMovieSubject.send((movie.id, indexPath))
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {

@@ -7,5 +7,5 @@
 
 
 enum MovieListNavigation {
-    case movieDetails(Int)
+    case movieDetails(Int, (MovieDetailsBack) -> Void)
 }

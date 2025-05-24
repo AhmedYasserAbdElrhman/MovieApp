@@ -18,7 +18,7 @@ final class MovieListViewModel: ViewModelType {
     // MARK: - Input/Output Types
     struct Input {
         let searchText: AnyPublisher<String, Never>
-        let selectMovie: AnyPublisher<Movie, Never>
+        let selectMovie: AnyPublisher<(id: Int, indexPath: IndexPath), Never>
         let toggleWatchlist: AnyPublisher<(id: Int, indexPath: IndexPath), Never>
         let viewDidLoad: AnyPublisher<Void, Never>
         let reachedBottom: AnyPublisher<Void, Never>
@@ -47,12 +47,12 @@ final class MovieListViewModel: ViewModelType {
     // cache for first‐page popular
     private var popularFirstPageCache: MovieResponse?
     private var currentSearchQuery: String?
+    private var currentSelectedIndexPath: IndexPath?
     // MARK: - Private Publishers
     private let movieSectionsSubject = CurrentValueSubject<[MovieSection], Never>([])
     private let isLoadingSubject = CurrentValueSubject<Bool, Never>(false)
     private let errorSubject = PassthroughSubject<String, Never>()
     private var cancellables = Set<AnyCancellable>()
-    
     // MARK: - Initialization
     init(dependencies: Dependencies) {
         self.dependencies = dependencies
@@ -78,9 +78,15 @@ final class MovieListViewModel: ViewModelType {
         
         // Handle movie selection
         input.selectMovie
-            .sink { [weak self] movie in
+            .sink { [weak self] id, indexPath in
                 guard let self else { return }
-                self.dependencies.navigation(.movieDetails(movie.id))
+                self.currentSelectedIndexPath = indexPath
+                self.dependencies.navigation(
+                    .movieDetails(
+                        id,
+                        processMovieDetailsCallback(_:)
+                    )
+                )
             }
             .store(in: &cancellables)
         
@@ -131,6 +137,16 @@ final class MovieListViewModel: ViewModelType {
             isLoading: isLoadingSubject.eraseToAnyPublisher(),
             error: errorSubject.eraseToAnyPublisher()
         )
+    }
+    private func processMovieDetailsCallback(_ callbackType: MovieDetailsBack) {
+        switch callbackType {
+        case .didAddToWatchlist(let movieId):
+            guard let currentSelectedIndexPath else { return }
+            didAddToWatchList(movieId, indexPath: currentSelectedIndexPath)
+        case .didRemoveFromWatchlist(let movieId):
+            guard let currentSelectedIndexPath else { return }
+            didAddToWatchList(movieId, indexPath: currentSelectedIndexPath)
+        }
     }
 }
 // MARK: - Movie Fetching Methods
@@ -228,6 +244,18 @@ extension MovieListViewModel {
 
 // MARK: - Watchlist Operations
 extension MovieListViewModel {
+    fileprivate func didAddToWatchList(_ movieId: Int, indexPath: IndexPath) {
+        watchlistMovieIds.insert(movieId)
+        movieSectionsSubject
+            .value[indexPath.section]
+            .movies[indexPath.row].isOnWatchlist = true
+    }
+    fileprivate func didRemoveFromWatchList(_ movieId: Int, indexPath: IndexPath) {
+        watchlistMovieIds.remove(movieId)
+        movieSectionsSubject
+            .value[indexPath.section]
+            .movies[indexPath.row].isOnWatchlist = false
+    }
     private func performAddToWatchList(_ movieId: Int, indexPath: IndexPath) {
         let useCase = dependencies.addToWatchListUseCase
         Task {
@@ -235,10 +263,7 @@ extension MovieListViewModel {
                 try await useCase.execute(requestValue: movieId)
                 await MainActor.run {
                     // Add to local cache
-                    watchlistMovieIds.insert(movieId)
-                    movieSectionsSubject
-                        .value[indexPath.section]
-                        .movies[indexPath.row].isOnWatchlist = true
+                    didAddToWatchList(movieId, indexPath: indexPath)
                 }
                 
             } catch {
@@ -254,10 +279,7 @@ extension MovieListViewModel {
                 try await useCase.execute(requestValue: movieId)
                 await MainActor.run {
                     // Remove from local cache
-                    watchlistMovieIds.remove(movieId)
-                    movieSectionsSubject
-                        .value[indexPath.section]
-                        .movies[indexPath.row].isOnWatchlist = false
+                    didRemoveFromWatchList(movieId, indexPath: indexPath)
                 }
                     
             } catch {

@@ -145,7 +145,7 @@ final class MovieListViewModel: ViewModelType {
             didAddToWatchList(movieId, indexPath: currentSelectedIndexPath)
         case .didRemoveFromWatchlist(let movieId):
             guard let currentSelectedIndexPath else { return }
-            didAddToWatchList(movieId, indexPath: currentSelectedIndexPath)
+            didRemoveFromWatchList(movieId, indexPath: currentSelectedIndexPath)
         }
     }
 }

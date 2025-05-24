@@ -11,7 +11,8 @@ import Foundation
 import CoreData
 public class WatchListLocalRepository: WatchListLocalRepositoryProtocol {
     private let storage: WatchListStack
-    public init(storage: WatchListStack = WatchListStack()) {
+    @MainActor
+    public init(storage: WatchListStack = WatchListStack.shared) {
         self.storage = storage
     }
     public func addMovieToWatchList(_ movieId: Int) async throws {

@@ -18,10 +18,7 @@ public struct MovieResponse: Codable, Sendable {
 public struct Movie: Codable, Sendable {
     public let adult: Bool
     public let backdropPath: String?
-    public let genreIds: [Int]
     public let id: Int
-    public let originalLanguage: String
-    public let originalTitle: String
     public let overview: String
     public let popularity: Double
     public let posterPath: String?
@@ -29,5 +26,8 @@ public struct Movie: Codable, Sendable {
     public let title: String
     public let video: Bool
     public let voteAverage: Double
-    public let voteCount: Int    
+    public let voteCount: Int
+    public let tagline: String?
+    public let revenue: Double?
+    public let status: String?
 }

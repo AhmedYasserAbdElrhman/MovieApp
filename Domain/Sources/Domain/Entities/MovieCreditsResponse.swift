@@ -6,25 +6,17 @@
 //
 
 import Foundation
-public struct MovieCredits: Decodable {
+public struct MovieCredits: Decodable, Sendable {
     let id: Int
-    let cast: [Cast]
-    let crew: [Crew]
+    public let cast: [Person]
+    public let crew: [Person]
 }
 
-struct Cast: Decodable {
-    let id: Int
-    let name: String
-    let character: String
-    let profilePath: String?
-    let popularity: Double
-}
-
-struct Crew: Decodable {
-    let id: Int
-    let name: String
-    let department: String
-    let job: String
-    let profilePath: String?
-    let popularity: Double
+public struct Person: Decodable, Sendable {
+    public let id: Int
+    public let name: String
+    public let knownForDepartment: String
+    public let popularity: Double
+    public let profilePath: String?
+    public let job: String?
 }

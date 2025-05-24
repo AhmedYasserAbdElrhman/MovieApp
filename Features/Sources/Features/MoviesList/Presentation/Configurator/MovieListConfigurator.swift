@@ -9,9 +9,11 @@ import Domain
 import Data
 import UIKit
 // MARK: - Configurator
-public struct MovieListConfigurator {
+struct MovieListConfigurator {
     @MainActor
-    public static func configure() -> UIViewController {
+    static func configure(
+        navigation: @escaping (MovieListNavigation) -> Void
+    ) -> UIViewController {
         // Setup dependencies here
         let moviesRepo: MovieRepositoryProtocol = MovieRepository()
         let popularMoviesUseCase = GetPopularMoviesUseCase(repository: moviesRepo)
@@ -21,6 +23,7 @@ public struct MovieListConfigurator {
         let getAllWatchListUseCase = GetAllWatchListUseCase(localRepository: watchListLocalRepository)
         let removeFromWatchListUseCase = RemoveFromWatchListUseCase(localRepository: watchListLocalRepository)
         let dependencies = MovieListViewModel.Dependencies(
+            navigation: navigation,
             popularMoviesUseCase: popularMoviesUseCase,
             searchMoviesUseCase: searchMoviesUseCase,
             addToWatchListUseCase: addToWatchListUseCase,

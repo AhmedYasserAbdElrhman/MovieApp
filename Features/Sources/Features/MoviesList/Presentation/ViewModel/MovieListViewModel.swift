@@ -32,6 +32,7 @@ final class MovieListViewModel: ViewModelType {
     
     // MARK: - Dependencies
     struct Dependencies {
+        let navigation: (MovieListNavigation) -> Void
         let popularMoviesUseCase: GetPopularMoviesUseCase
         let searchMoviesUseCase: SearchMoviesUseCase
         let addToWatchListUseCase: AddToWatchListUseCase
@@ -77,9 +78,9 @@ final class MovieListViewModel: ViewModelType {
         
         // Handle movie selection
         input.selectMovie
-            .sink { movie in
-                print("Selected movie: \(movie.title)")
-                // Handle movie selection (e.g., navigate to detail screen)
+            .sink { [weak self] movie in
+                guard let self else { return }
+                self.dependencies.navigation(.movieDetails(movie.id))
             }
             .store(in: &cancellables)
         

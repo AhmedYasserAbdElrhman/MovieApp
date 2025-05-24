@@ -21,15 +21,18 @@ public final class MovieRepository: MovieRepositoryProtocol {
         try await networkClient.performRequest(MoviesRoute.search(query: query))
     }
 
-//
-//    func getMovieDetails(id: Int) async throws -> MovieDetails {
-//    }
-//    
-//    func getSimilarMovies(id: Int) async throws -> [Movie] {
-//    }
-//    
-//    func getMovieCredits(id: Int) async throws -> [CastMember] {
-//    }
+
+    public func getMovieDetails(id: Int) async throws -> Movie {
+        try await networkClient.performRequest(MovieDetailsRoute.details(id))
+    }
+    
+    public func getSimilarMovies(id: Int) async throws -> MovieResponse {
+        try await networkClient.performRequest(MovieDetailsRoute.similar(id))
+    }
+    
+    public func getMovieCredits(id: Int) async throws -> MovieCredits {
+        try await networkClient.performRequest(MovieDetailsRoute.credits(id))
+    }
     
     
 }

@@ -20,11 +20,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Create window
         window = UIWindow(windowScene: windowScene)
 
-        // Use the configurator to create the initial VC
-        let rootVC = MovieListConfigurator.configure()
-
+        let navigationController = UINavigationController()
         // Set root view controller
-        window?.rootViewController = UINavigationController(rootViewController: rootVC)
+        window?.rootViewController = navigationController
+        let coordinator = FeatureCoordinator(navigationController: navigationController)
+        coordinator.start()
         window?.makeKeyAndVisible()
     }
 

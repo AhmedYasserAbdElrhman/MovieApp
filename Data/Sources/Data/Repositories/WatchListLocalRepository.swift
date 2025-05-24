@@ -63,4 +63,20 @@ public class WatchListLocalRepository: WatchListLocalRepositoryProtocol {
             }
         }
     }
+    
+    public func isMovieInWatchList(_ movieId: Int) async throws -> Bool {
+        try await withCheckedThrowingContinuation { continuation in
+            storage.performBackgroundTask { context in
+                let fetchRequest: NSFetchRequest<Storage.Movie> = Storage.Movie.fetchRequest()
+                fetchRequest.predicate = NSPredicate(format: "id == %d", movieId)
+                
+                do {
+                    let count = try context.count(for: fetchRequest)
+                    continuation.resume(returning: count > 0)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
 }

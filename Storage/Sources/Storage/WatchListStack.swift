@@ -11,7 +11,9 @@ import OSLog
 
 public final class WatchListStack {
     // MARK: - Properties
-    
+    @MainActor
+    public static let shared = WatchListStack()
+
     private let coreDataStack: CoreDataStack
     
     // You can expose main context if needed
@@ -22,7 +24,7 @@ public final class WatchListStack {
     // MARK: - Initialization
     
     /// Initialize WatchListStack with model name and bundle (e.g. SPM package bundle)
-    public init(modelName: String = "WatchListDataFile", loggingEnabled: Bool = true) {
+    private init(modelName: String = "WatchListDataFile", loggingEnabled: Bool = true) {
         coreDataStack = CoreDataStack(
             modelName: modelName,
             bundle: Bundle.module,

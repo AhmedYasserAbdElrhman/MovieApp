@@ -9,4 +9,5 @@ public protocol WatchListLocalRepositoryProtocol {
     func addMovieToWatchList(_ movieId: Int) async throws
     func removeMovieFromWatchList(_ movieId: Int) async throws
     func getWatchListMovies() async throws -> [Int]
+    func isMovieInWatchList(_ movieId: Int) async throws -> Bool
 }

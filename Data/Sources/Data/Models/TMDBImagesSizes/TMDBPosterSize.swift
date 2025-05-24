@@ -6,7 +6,7 @@
 //
 
 
-enum TMDBPosterSize: String {
+public enum TMDBPosterSize: String {
     case w92 = "w92"       // small thumbnail
     case w154 = "w154"     // small poster
     case w185 = "w185"     // medium poster (good for small UIImageViews)

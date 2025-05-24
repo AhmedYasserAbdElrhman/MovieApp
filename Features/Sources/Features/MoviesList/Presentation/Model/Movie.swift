@@ -7,10 +7,8 @@
 import Domain
 import Foundation
 import FoundationExtensions
-struct Movie {
-    // TMDb image config
-    private static let imageBaseURL = "https://image.tmdb.org/t/p/"
-
+import Data
+struct Movie: TMDBPosterProviding {
     var releaseYear: Int {
         guard let dateStr = releaseDate,
                 !dateStr.isEmpty,
@@ -32,9 +30,5 @@ struct Movie {
         self.posterPath = movieEntity.posterPath
         self.releaseDate = movieEntity.releaseDate
         self.isOnWatchlist = isOnWatchList
-    }
-    func posterURL(for size: TMDBPosterSize = .w185) -> URL? {
-        guard let path = posterPath else { return nil }
-        return URL(string: Self.imageBaseURL + size.rawValue + path)
     }
 }

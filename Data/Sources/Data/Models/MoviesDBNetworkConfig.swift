@@ -7,6 +7,7 @@
 
 import Foundation
 struct MoviesDBNetworkConfig {
+    static let imageBaseURL = "https://image.tmdb.org/t/p/"
     static let baseURL: URL = {
         guard let url = URL(string: "https://api.themoviedb.org/3") else {
             fatalError("Invalid Base URL")

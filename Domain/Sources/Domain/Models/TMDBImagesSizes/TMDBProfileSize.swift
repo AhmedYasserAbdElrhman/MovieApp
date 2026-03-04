@@ -1,6 +1,6 @@
 //
 //  TMDBProfileSize.swift
-//  Data
+//  Domain
 //
 //  Created by Ahmad Yasser on 24/05/2025.
 //

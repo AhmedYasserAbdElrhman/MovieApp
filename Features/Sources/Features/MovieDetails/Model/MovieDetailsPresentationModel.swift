@@ -7,7 +7,6 @@
 
 import Domain
 import Foundation
-import Data
 struct MovieDetailsPresentationModel: TMDBPosterProviding, TMDBBackdropProviding {
     let title: String
     let overview: String

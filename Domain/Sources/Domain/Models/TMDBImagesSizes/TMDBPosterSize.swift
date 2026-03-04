@@ -1,6 +1,6 @@
 //
 //  TMDBPosterSize.swift
-//  Features
+//  Domain
 //
 //  Created by Ahmad Yasser on 22/05/2025.
 //

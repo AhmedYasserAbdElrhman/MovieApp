@@ -18,7 +18,7 @@ MovieApp is organized into independent Swift Package modules, each with a single
   * Includes two main flows:
   * **MoviesList**: Popular movies, search, and watch-list actions.
   * **MovieDetails**: Movie info, similar titles, and cast/crew.
-* **Domain** 📖: Business rules, entities, use cases, and protocols.
+* **Domain** 📖: Business rules, entities, use cases, repository protocols, and TMDB image-URL contracts (size enums + URL-building protocols).
 * **Data** 💾: Implements domain protocols, TMDB API calls, and local persistence.
 * **Network** 🌐: HTTP client & endpoint definitions.
 * **Storage** 🗄️: Core Data stack wrapper for persistent storage.
@@ -44,13 +44,16 @@ graph TD
 
   App --> Features
   Features --> Domain
-  Features --> Data
+  Features -.->|Configurators only| Data
   Features --> Utils
+  Data --> Domain
   Data --> Network
   Data --> Storage
   Network --> FoundationExtensions
   Utils --> Kingfisher
 ```
+
+> **Note:** Feature presentation models depend **only** on `Domain` — they never import `Data`. The dashed `Features → Data` edge exists solely in the **Configurator** files, which wire concrete repository implementations at the composition root.
 
 ## 🛠️ Installation & Build 🛠️
 
@@ -92,6 +95,10 @@ window.rootViewController = nav
 
   * TMDB login flow: obtain account code & access token.
   * Real-time watch-list sync with TMDB account.
+* **💉 DI Container**:
+
+  * Introduce a dependency-injection container at the App level.
+  * Remove the remaining `import Data` from Feature Configurators, making `Features` depend **purely** on `Domain`.
 
 ## 🤝 Contributing 🤝
 

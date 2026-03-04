@@ -5,7 +5,6 @@
 //  Created by Ahmad Yasser on 24/05/2025.
 //
 
-import Data
 import Domain
 struct PersonPresentationModel: TMDBProfileProviding {
     let id: Int
@@ -21,6 +20,3 @@ struct PersonPresentationModel: TMDBProfileProviding {
     }
 }
 
-extension Person {
-    var isDirector: Bool { knownForDepartment == "Directing" && job == "Director" }
-}

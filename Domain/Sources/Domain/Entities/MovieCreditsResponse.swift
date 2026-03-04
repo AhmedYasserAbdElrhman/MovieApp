@@ -20,3 +20,7 @@ public struct Person: Decodable, Sendable {
     public let profilePath: String?
     public let job: String?
 }
+
+extension Person {
+    public var isDirector: Bool { knownForDepartment == "Directing" && job == "Director" }
+}
